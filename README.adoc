@@ -1,0 +1,171 @@
+= jesse java ee app generator
+A simple JSF hello world app
+
+1) generate app from link:http://www.atbash.be/2018/07/09/microprofile-1-3-support-for-jessie/[this blog post].
+
+in my case it was it was: http://jessie-jessie.1d35.starter-us-east-1.openshiftapps.com/jessie/
+
+2) unzip and install maven wrapper
+
+[source,bash]
+----
+unzip -d app ...
+cd app/
+mvn -N io.takari:maven:wrapper -Dmaven=3.5.4
+----
+
+3) setup thorntail microprofile + JSF + CDI
+
+.pom.xml
+[source,xml]
+----
+  <packaging>war</packaging>
+
+  <properties>
+    <thorntail.version>2.2.1.Final</thorntail.version>
+    <h2.version>1.4.196</h2.version>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
+    <failOnMissingWebXml>false</failOnMissingWebXml>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.thorntail</groupId>
+        <artifactId>bom-all</artifactId>
+        <version>${thorntail.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+
+      <dependency>
+        <groupId>io.thorntail</groupId>
+        <artifactId>bom</artifactId>
+        <version>${thorntail.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+
+      <dependency>
+        <groupId>javax</groupId>
+        <artifactId>javaee-api</artifactId>
+        <version>8.0</version>
+        <scope>provided</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>javax</groupId>
+      <artifactId>javaee-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>io.thorntail</groupId>
+      <artifactId>jsf</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.thorntail</groupId>
+      <artifactId>cdi</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.thorntail</groupId>
+      <artifactId>microprofile</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>io.thorntail</groupId>
+          <artifactId>openapi</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <defaultGoal>clean package</defaultGoal>
+
+    <plugins>
+      <plugin>
+        <groupId>io.thorntail</groupId>
+        <artifactId>thorntail-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>io.thorntail</groupId>
+          <artifactId>thorntail-maven-plugin</artifactId>
+          <version>${thorntail.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>package</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <hollow>false</hollow>
+            <useUberJar>true</useUberJar>
+            <fractionDetectMode>force</fractionDetectMode>
+            <executable>true</executable>
+            <properties>
+              <java.net.preferIPv4Stack>true</java.net.preferIPv4Stack>
+            </properties>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>start</id>
+      <build>
+        <defaultGoal>clean package thorntail:start</defaultGoal>
+      </build>
+    </profile>
+
+    <profile>
+      <id>debug</id>
+      <build>
+        <defaultGoal>clean package thorntail:start</defaultGoal>
+        <plugins>
+          <plugin>
+            <groupId>io.thorntail</groupId>
+            <artifactId>thorntail-maven-plugin</artifactId>
+            <configuration>
+              <debugPort>5005</debugPort>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+----
+
+4) run
+
+.build uber jar and start application
+[source,bash]
+----
+./mvnw -Pstart
+----
+
+.debug application (port 5005, default idea settings should works fine)
+[source,bash]
+----
+./mvnw -Pdebug
+----
+
+.build and start mannually
+[source,bash]
+----
+./mvnw clean package
+bash ./target/*-thorntail.jar
+----
