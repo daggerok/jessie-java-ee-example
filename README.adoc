@@ -1,4 +1,4 @@
-= jesse java ee app generator
+= jesse java ee app generator image:https://travis-ci.org/daggerok/jessie-java-ee-example.svg?branch=master["Build Status", link="https://travis-ci.org/daggerok/jessie-java-ee-example"]
 A simple JSF hello world app
 
 1) generate app from link:http://www.atbash.be/2018/07/09/microprofile-1-3-support-for-jessie/[this blog post].
